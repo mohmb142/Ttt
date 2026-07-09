@@ -1,0 +1,6 @@
+{
+  "name": "Apex-Bot-Environment",
+  "image": "mcr.microsoft.com/devcontainers/python:3.10",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libnss3 libx11-xcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxi6 libxrandr2 libxss1 libxtst6 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 && pip install -r requirements.txt && playwright install chromium",
+  "remoteUser": "vscode"
+}
