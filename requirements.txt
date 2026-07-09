@@ -1,0 +1,6 @@
+playwright
+aiohttp
+aiohttp_socks
+fake-useragent
+google-generativeai
+curl_cffi
