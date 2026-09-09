@@ -20,11 +20,7 @@ class MainActivity : Activity() {
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 10)
         }
 
-        val box = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(36, 50, 36, 40)
-        }
+        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL; setPadding(36, 50, 36, 40) }
         val title = TextView(this).apply { text = "مساعد الهاتف الذكي"; textSize = 28f }
         status = TextView(this).apply { text = stateText(); textSize = 17f; setPadding(0, 24, 0, 24) }
         val accessibility = Button(this).apply { text = "1) تفعيل صلاحية التحكم" }
@@ -32,10 +28,8 @@ class MainActivity : Activity() {
         val caller = Button(this).apply { text = "👤 من المتصل؟" }
         val answer = Button(this).apply { text = "📞 الرد على مكالمة واتساب" }
         val always = Button(this).apply { text = "🎧 تشغيل/إيقاف الاستماع الدائم" }
-
         box.addView(title); box.addView(status); box.addView(accessibility); box.addView(listen); box.addView(caller); box.addView(answer); box.addView(always)
         setContentView(box)
-
         accessibility.setOnClickListener { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
         listen.setOnClickListener { listenForCommand() }
         caller.setOnClickListener { sayCaller() }
@@ -56,7 +50,7 @@ class MainActivity : Activity() {
             text.contains("أجب") || text.contains("اجب") || text.contains("رد على المكالمة") -> answerCall()
             text.contains("ماذا يريد") || text.contains("اسأله") -> {
                 answerCall()
-                VoiceAssistant.speak(this, "تم الرد. سأحاول تشغيل وضع المحادثة. ملاحظة: أندرويد لا يسمح للتطبيق بقراءة صوت الطرف الآخر من مكالمة واتساب بشكل موثوق.")
+                VoiceAssistant.speak(this, "تم الرد. لا أستطيع قراءة صوت الطرف الآخر من مكالمة واتساب بشكل موثوق باستخدام واجهات أندرويد العامة.")
             }
             text.contains("الرئيسية") -> PhoneAccessibilityService.instance?.globalHome()
             text.contains("رجوع") -> PhoneAccessibilityService.instance?.globalBack()
@@ -77,7 +71,7 @@ class MainActivity : Activity() {
             status.text = "تم الضغط على زر الرد في واتساب"
             VoiceAssistant.speak(this, "تم الرد على المكالمة")
         } else {
-            status.text = "لم أجد زر الرد. افتح شاشة مكالمة واتساب وفعّل صلاحية Accessibility."
+            status.text = "لم أجد زر الرد. افتح شاشة مكالمة واتساب وفعّل Accessibility."
             VoiceAssistant.speak(this, "لم أجد زر الرد في شاشة واتساب")
         }
     }
@@ -85,12 +79,16 @@ class MainActivity : Activity() {
     private fun toggleAlwaysListening() {
         val intent = Intent(this, AlwaysListeningService::class.java)
         if (AgentState.conversationMode) {
-            stopService(intent)
             AgentState.conversationMode = false
+            stopService(intent)
             status.text = "الاستماع الدائم متوقف"
         } else {
-            if (android.os.Build.VERSION.SDK_INT >= 26) startForegroundService(intent) else startService(intent)
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 10)
+                return
+            }
             AgentState.conversationMode = true
+            if (android.os.Build.VERSION.SDK_INT >= 26) startForegroundService(intent) else startService(intent)
             status.text = "الاستماع الدائم يعمل — يمكنك قول: من المتصل"
         }
     }
